@@ -9,7 +9,7 @@ N_TARGETS = 1
 DISCOUNT_TERM = 1.0
 THETA = 1e-3
 DECIMAL_DIGITS = 2
-ALGORITHM = 'value_iteration'   # DP algorithm (policy iteration or value_iteration)
+ALGORITHM = 'value_iteration'   # DP algorithm (policy_iteration or value_iteration)
 
 
 class StateSpace:
