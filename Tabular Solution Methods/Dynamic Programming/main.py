@@ -3,16 +3,13 @@ from gym_examples.envs.grid_world import GridWorldEnv
 import gym
 import numpy as np
 import time
-import math
 
 SIZE = 5
 N_TARGETS = 1
 DISCOUNT_TERM = 1.0
 THETA = 1e-3
 DECIMAL_DIGITS = 2
-
-
-
+ALGORITHM = 'value_iteration'   # DP algorithm (policy iteration or value_iteration)
 
 
 class StateSpace:
@@ -32,12 +29,9 @@ class StateSpace:
         self.j += 1
         return (self.i, self.j)
 
-def iterative_policy_evaluation(obs, policy_dict, state_value_dict, discount_term, theta, log=False):
+def iterative_policy_evaluation(obs, policy_dict, state_value_dict, discount_term, theta):
     state_space = iter(StateSpace())
     delta = float('inf')
-    if log:
-        print('Iterative Policy Evaluation')
-    step = 0
     while delta >= theta:
         # Iterate over all states (agent_location)
         delta = 0
@@ -54,13 +48,10 @@ def iterative_policy_evaluation(obs, policy_dict, state_value_dict, discount_ter
             
             delta = max(delta, abs(value - new_state_value))
             state_value_dict[state] = new_state_value
-        if not step % 10000 and log:
-            print(step)
-            print(delta)
-            print(state_value_dict)
+    
+    # Reduce float precision
     for state in state_space:
         state_value_dict[state] = round(state_value_dict[state], DECIMAL_DIGITS)
-    
     return delta
 
 def policy(policy_dict, state):
@@ -92,10 +83,10 @@ def policy_improvement(obs, policy_dict, state_value_dict, discount_term):
                 max_actions.clear()
             if action_value == max_action_value:
                 max_actions.append(action)
-        
-            
+
         if policy_action not in max_actions:
             policy_stable = False
+
         for action in policy_dict[state].keys():
             if action not in max_actions:
                 policy_dict[state][action] = 0
@@ -120,6 +111,7 @@ def policy_iteration(obs, discount_term):
 
     return policy_dict
 
+
 def value_iteration(obs, discount_term):
     obs = obs.copy()
     equiprobable_policy = {i: 0.25 for i in  range(4)}  # action: probability dictionary
@@ -127,7 +119,7 @@ def value_iteration(obs, discount_term):
     policy_dict = {state: equiprobable_policy.copy() for state in state_space}
     state_value_dict = {state: 0 for state in state_space}
 
-    iterative_policy_evaluation(obs, policy_dict, state_value_dict, discount_term, THETA, log=False)
+    iterative_policy_evaluation(obs, policy_dict, state_value_dict, discount_term, THETA)
     _ = policy_improvement(obs, policy_dict, state_value_dict, discount_term)
 
     return policy_dict
@@ -138,29 +130,27 @@ def agent_fn(policy_dict, obs):
 
 
 def main():
+    assert ALGORITHM in ['value_iteration', 'policy_iteration']
+    assert 0 < THETA <= 1
+
     env = gym.make('gym_examples/GridWorld-v1', size=SIZE, n_targets=N_TARGETS, render_mode='human')
-
     num_episodes = 50
-
-
 
     for _ in range(num_episodes):
         obs, _ = env.reset()
-        policy_dict = value_iteration(obs, discount_term=DISCOUNT_TERM)
+        if ALGORITHM == 'value_iteration':
+            policy_dict = value_iteration(obs, discount_term=DISCOUNT_TERM)
+        else:
+            policy_dict = policy_iteration(obs, discount_term=DISCOUNT_TERM)
+            
         done = False
         while not done:
-
             action = agent_fn(policy_dict, obs)
-            
-            # apply the action
             obs, reward, done, truncated, info = env.step(action)
-
             # Render the env
             env.render()
-
             # Wait a bit before the next frame unless you want to see a crazy fast video
             time.sleep(0.1)
-            
 
     # Close the env
     env.close()
