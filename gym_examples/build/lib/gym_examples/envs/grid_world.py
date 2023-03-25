@@ -70,7 +70,7 @@ class GridWorldEnv(gym.Env):
         )
         result_obs['agent'] = agent_location
         done = cls.goal_state(result_obs)
-        reward = 0 if done else -1
+        reward = -1
         return result_obs, reward, done, {}
 
     @staticmethod
@@ -113,7 +113,7 @@ class GridWorldEnv(gym.Env):
         )
         # An episode is done if the agent has reached the target
         done = np.any([np.array_equal(self._agent_location, target_location) for target_location in self._target_locations.values()])
-        reward = 0 if done else -1  # Binary rewards
+        reward = -1
         observation = self._get_obs()
         info = self._get_info()
 
