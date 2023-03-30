@@ -4,12 +4,12 @@ import gym
 import numpy as np
 import time
 
-SIZE = 5
-N_TARGETS = 1
+SIZE = 4
+N_TARGETS = 2
 DISCOUNT_TERM = 1.0
 THETA = 1e-3
 DECIMAL_DIGITS = 2
-ALGORITHM = 'value_iteration'   # DP algorithm (policy_iteration or value_iteration)
+ALGORITHM = 'policy_iteration'   # DP algorithm (policy_iteration or value_iteration)
 
 
 class StateSpace:
@@ -106,7 +106,7 @@ def policy_iteration(obs, discount_term):
 
     policy_stable = False
     while not policy_stable:
-        iterative_policy_evaluation(obs, policy_dict, state_value_dict, discount_term, THETA, log=False)
+        iterative_policy_evaluation(obs, policy_dict, state_value_dict, discount_term, THETA)
         policy_stable = policy_improvement(obs, policy_dict, state_value_dict, discount_term)
 
     return policy_dict
@@ -134,7 +134,7 @@ def main():
     assert 0 < THETA <= 1
 
     env = gym.make('gym_examples/GridWorld-v1', size=SIZE, n_targets=N_TARGETS, render_mode='human')
-    num_episodes = 50
+    num_episodes = 1
 
     for _ in range(num_episodes):
         obs, _ = env.reset()
@@ -142,6 +142,11 @@ def main():
             policy_dict = value_iteration(obs, discount_term=DISCOUNT_TERM)
         else:
             policy_dict = policy_iteration(obs, discount_term=DISCOUNT_TERM)
+        
+        for key, value in policy_dict.items():
+            print(f'State: {key}')
+            print(f'Action: probability dict: {value}')
+            print()
             
         done = False
         while not done:
