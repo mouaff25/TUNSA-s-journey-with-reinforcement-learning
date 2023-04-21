@@ -142,11 +142,6 @@ def main():
             policy_dict = value_iteration(obs, discount_term=DISCOUNT_TERM)
         else:
             policy_dict = policy_iteration(obs, discount_term=DISCOUNT_TERM)
-        
-        for key, value in policy_dict.items():
-            print(f'State: {key}')
-            print(f'Action: probability dict: {value}')
-            print()
             
         done = False
         while not done:
