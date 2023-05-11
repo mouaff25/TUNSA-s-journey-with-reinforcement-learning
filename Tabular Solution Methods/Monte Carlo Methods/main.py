@@ -71,7 +71,7 @@ def test_policy(policy, env):
 
 
 
-def monte_carlo_es(env, episodes=100, policy=None):
+def monte_carlo_es(env, episodes=1000, policy=None):
     if policy is None:
         policy = create_random_policy(env)  # Create an empty dictionary to store state action values    
     Q = create_state_action_dictionary(env) # Empty dictionary for storing rewards for each state-action pair
@@ -99,8 +99,8 @@ def monte_carlo_es(env, episodes=100, policy=None):
                 
                 Q_list = list(map(lambda x: x[1], Q[s_t].items())) # Finding the action with maximum value
                 indices = [i for i, x in enumerate(Q_list) if x == max(Q_list)]
-                
                 for a in policy[s_t].items(): # Update action probability for s_t in policy
+                    print(a)
                     if a[0] in indices:
                         policy[s_t][a[0]] = 1 / len(indices)
                     else:
@@ -108,7 +108,7 @@ def monte_carlo_es(env, episodes=100, policy=None):
     return policy
 
 
-def monte_carlo_e_soft(env, episodes=100, policy=None, epsilon=0.01):
+def monte_carlo_e_soft(env, episodes=10, policy=None, epsilon=0.01):
     if policy is None:
         policy = create_random_policy(env)  # Create an empty dictionary to store state action values    
     Q = create_state_action_dictionary(env) # Empty dictionary for storing rewards for each state-action pair
@@ -198,8 +198,8 @@ def monte_carlo_off_policy(env, behavior_policy=None, episodes=100):
 def main():
     random.seed(RANDOM_SEED)
     env = gym.make('FrozenLake-v1', is_slippery=False)
-    policy = monte_carlo_off_policy(env, episodes=5000)
-    # env = gym.make('FrozenLake-v1', is_slippery=False, render_mode='human')
+    policy = monte_carlo_es(env, episodes=1000, policy=None)
+    #env = gym.make('FrozenLake-v1', is_slippery=False, render_mode='human')
     win_percentage = test_policy(policy, env) * 100
     print(f'Winning Percentage: {win_percentage:.2f}%')
 
